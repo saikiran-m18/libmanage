@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Library Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #333;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h2 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header h2 i {
+      color: #fff;
+    }
+    header nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header nav a {
+      color: white;
+      text-decoration: none;
+      margin-right: 10px;
+    }
+    header nav a:hover {
+      text-decoration: underline;
+    }
+    header nav input {
+      padding: 6px;
+      border-radius: 4px;
+      border: none;
+    }
+    header nav button {
+      padding: 6px 12px;
+      border: none;
+      background-color: #555;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    main {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 16px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .radio-group {
+      margin: 10px 0;
+    }
+    .table-container {
+      margin-top: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    #error-message {
+      color: red;
+      text-align: center;
+      margin: 10px 0;
+    }
+    #no-results {
+      text-align: center;
+      margin-top: 20px;
+      font-style: italic;
+      color: gray;
+    }
+    h3 i {
+      margin-right: 8px;
+      color: #007BFF;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2><i class="fas fa-book"></i>Library Management System</h2>
+    <nav>
+      <a href="#"><i class="fas fa-home"></i> Home</a>
+      <input type="text" id="search" placeholder="Search..." oninput="searchBooks()" />
+    </nav>
+  </header>
+
+  <main>
+    <div id="login-form">
+      <h3><i class="fas fa-sign-in-alt"></i>Login</h3>
+      <div class="form-group">
+        <label><i class="fas fa-user"></i> Username</label>
+        <input type="text" id="username" />
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-lock"></i> Password</label>
+        <input type="password" id="password" />
+      </div>
+      <button onclick="login()"><i class="fas fa-sign-in-alt"></i> Login</button>
+      <div id="error-message"></div>
+    </div>
+
+    <div id="library-section" style="display:none">
+      <h3><i class="fas fa-cogs"></i>Manage Library</h3>
+      <div class="form-group">
+        <label><i class="fas fa-book"></i> Book Name</label>
+        <input type="text" id="bookName" />
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-user-edit"></i> Author</label>
+        <input type="text" id="author" />
+      </div>
+      <div class="radio-group">
+        <label><i class="fas fa-feather-alt"></i> <input type="radio" name="type" value="Fiction" /> Fiction</label>
+        <label><i class="fas fa-laptop-code"></i> <input type="radio" name="type" value="Computer Programming" /> Computer Programming</label>
+        <label><i class="fas fa-utensils"></i> <input type="radio" name="type" value="Cooking" /> Cooking</label>
+      </div>
+      <button onclick="addBook()"><i class="fas fa-plus"></i> Add Book</button>
+
+      <div class="table-container">
+        <h3><i class="fas fa-book-open"></i>Your Books</h3>
+        <table id="bookTable">
+          <thead>
+            <tr>
+              <th><i class="fas fa-book"></i> Name</th>
+              <th><i class="fas fa-user"></i> Author</th>
+              <th><i class="fas fa-tags"></i> Type</th>
+              <th><i class="fas fa-tools"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="no-results" style="display:none">No books found matching your search.</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let books = [];
+
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const error = document.getElementById('error-message');
+
+      if (username === 'admin' && password === '1234') {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('library-section').style.display = 'block';
+        error.innerText = '';
+      } else {
+        error.innerText = '❌ Invalid login credentials.';
+      }
+    }
+
+    function addBook() {
+      const name = document.getElementById('bookName').value;
+      const author = document.getElementById('author').value;
+      const type = document.querySelector('input[name="type"]:checked');
+      if (!name || !author || !type) return;
+
+      books.push({ name, author, type: type.value });
+      displayBooks();
+      document.getElementById('bookName').value = '';
+      document.getElementById('author').value = '';
+    }
+
+    function displayBooks(filter = '') {
+      const tbody = document.querySelector('#bookTable tbody');
+      const noResults = document.getElementById('no-results');
+      tbody.innerHTML = '';
+      let filtered = books.filter(book =>
+        book.name.toLowerCase().includes(filter.toLowerCase()) ||
+        book.author.toLowerCase().includes(filter.toLowerCase()) ||
+        book.type.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      if (filtered.length === 0) {
+        noResults.style.display = 'block';
+      } else {
+        noResults.style.display = 'none';
+        filtered.forEach((book, index) => {
+          const row = tbody.insertRow();
+          row.insertCell(0).innerText = book.name;
+          row.insertCell(1).innerText = book.author;
+          row.insertCell(2).innerText = book.type;
+          const actions = row.insertCell(3);
+
+          const delBtn = document.createElement('button');
+          delBtn.innerHTML = '<i class="fas fa-trash"></i> Delete';
+          delBtn.style.backgroundColor = '#dc3545';
+          delBtn.onclick = () => {
+            books.splice(index, 1);
+            displayBooks(document.getElementById('search').value);
+          };
+          actions.appendChild(delBtn);
+
+          const editBtn = document.createElement('button');
+          editBtn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+          editBtn.style.marginLeft = '10px';
+          editBtn.onclick = () => {
+            document.getElementById('bookName').value = book.name;
+            document.getElementById('author').value = book.author;
+          };
+          actions.appendChild(editBtn);
+        });
+      }
+    }
+
+    function searchBooks() {
+      const val = document.getElementById('search').value;
+      displayBooks(val);
+    }
+  </script>
+</body>
+</html>
